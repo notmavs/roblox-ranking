@@ -20,18 +20,17 @@ app.post("/group/:group/member/:user/rank", async (req, res) => {
         // Get roles
         const rolesRes = await fetch(`https://groups.roblox.com/v1/groups/${GROUP_ID}/roles`);
         const rolesData = await rolesRes.json();
-        console.log("Roles fetched:", JSON.stringify(rolesData));
-
         const role = rolesData.roles.find(r => r.rank === rank);
+
         if (!role) {
-            console.log("Role not found for rank:", rank);
             return res.status(404).json({ message: "Rank not found" });
         }
 
         console.log("Found role:", role);
 
-        // Get membership
-        const response = await fetch(`https://apis.roblox.com/cloud/v2/groups/${GROUP_ID}/memberships?filter=user==users/${userId}`, {
+        // Get membership using correct filter format
+        const filter = encodeURIComponent(`user == "users/${userId}"`);
+        const response = await fetch(`https://apis.roblox.com/cloud/v2/groups/${GROUP_ID}/memberships?filter=${filter}`, {
             headers: { "x-api-key": OPEN_CLOUD_KEY }
         });
         const data = await response.json();
