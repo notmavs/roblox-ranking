@@ -15,29 +15,34 @@ app.post("/group/:group/member/:user/rank", async (req, res) => {
         const userId = parseInt(req.params.user);
         const rank = req.body.rank;
 
-        // First get the role ID from the rank number
+        console.log(`Ranking user ${userId} to rank ${rank}`);
+
+        // Get roles
         const rolesRes = await fetch(`https://groups.roblox.com/v1/groups/${GROUP_ID}/roles`);
         const rolesData = await rolesRes.json();
-        const role = rolesData.roles.find(r => r.rank === rank);
+        console.log("Roles fetched:", JSON.stringify(rolesData));
 
+        const role = rolesData.roles.find(r => r.rank === rank);
         if (!role) {
+            console.log("Role not found for rank:", rank);
             return res.status(404).json({ message: "Rank not found" });
         }
 
-        // Set the rank using Open Cloud
+        console.log("Found role:", role);
+
+        // Get membership
         const response = await fetch(`https://apis.roblox.com/cloud/v2/groups/${GROUP_ID}/memberships?filter=user==users/${userId}`, {
-            headers: {
-                "x-api-key": OPEN_CLOUD_KEY
-            }
+            headers: { "x-api-key": OPEN_CLOUD_KEY }
         });
-
         const data = await response.json();
-        const membership = data.groupMemberships?.[0];
+        console.log("Membership response:", JSON.stringify(data));
 
+        const membership = data.groupMemberships?.[0];
         if (!membership) {
             return res.status(404).json({ message: "User not in group" });
         }
 
+        // Update rank
         const updateRes = await fetch(`https://apis.roblox.com/cloud/v2/${membership.path}`, {
             method: "PATCH",
             headers: {
@@ -48,10 +53,12 @@ app.post("/group/:group/member/:user/rank", async (req, res) => {
         });
 
         const updateData = await updateRes.json();
+        console.log("Update response:", JSON.stringify(updateData));
+
         res.json({ success: true, data: updateData });
 
     } catch (err) {
-        console.log(err);
+        console.log("Error:", err);
         res.status(500).json({ message: err.message });
     }
 });
