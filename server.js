@@ -28,18 +28,19 @@ app.post("/group/:group/member/:user/rank", async (req, res) => {
 
         console.log("Found role:", role);
 
-        // Get membership using correct filter format
-        const filter = encodeURIComponent(`user == "users/${userId}"`);
-        const response = await fetch(`https://apis.roblox.com/cloud/v2/groups/${GROUP_ID}/memberships?filter=${filter}`, {
+        // Get membership - no filter, list all and find the user
+        const response = await fetch(`https://apis.roblox.com/cloud/v2/groups/${GROUP_ID}/memberships?maxPageSize=100`, {
             headers: { "x-api-key": OPEN_CLOUD_KEY }
         });
         const data = await response.json();
         console.log("Membership response:", JSON.stringify(data));
 
-        const membership = data.groupMemberships?.[0];
+        const membership = data.groupMemberships?.find(m => m.user === `users/${userId}`);
         if (!membership) {
             return res.status(404).json({ message: "User not in group" });
         }
+
+        console.log("Found membership:", membership);
 
         // Update rank
         const updateRes = await fetch(`https://apis.roblox.com/cloud/v2/${membership.path}`, {
