@@ -1,3 +1,9 @@
+const express = require("express");
+const app = express();
+app.use(express.json());
+const GROUP_ID = 33631972;
+const TOKEN = process.env.API_TOKEN;
+const OPEN_CLOUD_KEY = process.env.ROBLOX_OPEN_CLOUD_KEY;
 app.post("/group/:group/member/:user/rank", async (req, res) => {
     if (req.headers.authorization !== TOKEN) {
         return res.status(403).json({ message: "Invalid token" });
