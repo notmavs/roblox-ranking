@@ -57,8 +57,14 @@ app.post("/group/:group/member/:user/rank", async (req, res) => {
         console.log("Update response:", JSON.stringify(updateData));
 
         res.json({ success: true, data: updateData });
-    } catch (err) {
+     } catch (err) {
         console.log("Error:", err);
         res.status(500).json({ message: err.message });
     }
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`Ranking API running on port ${PORT}`);
 });
